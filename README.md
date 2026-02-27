@@ -8,6 +8,36 @@ I just deleted Qwen 3.5 35B A4B Heretic GGUF, with file names "Qwen3.5-35B-A3B-h
 ```
 
 ### Preview
+- The program...
+```
+===============================================================================
+    UnDeleteFile
+===============================================================================
+
+
+
+
+
+
+
+
+    1. Set Full Path: G:\Some Folder
+
+    2. Set File Name(s): SomeFile1.Ext, SomeFile2.Ext
+
+    3. Set Destination: E:\Some Folder
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Selection; Menu Options = 1-3, Run Recovery = R, Exit Program = X:
+
+```
 - The installer...
 ```
 ===============================================================================
@@ -16,7 +46,6 @@ I just deleted Qwen 3.5 35B A4B Heretic GGUF, with file names "Qwen3.5-35B-A3B-h
 
  [1/2] Checking for winget...
  [2/2] Verifying/Installing Windows File Recovery...
-  (This may open the Microsoft Store for agreements)
 
 
  -------------------------------------------------------------------------------
@@ -27,7 +56,9 @@ I just deleted Qwen 3.5 35B A4B Heretic GGUF, with file names "Qwen3.5-35B-A3B-h
 
 Press Enter to return to Menu:
 
+```
 
-
+### Notation
+- This "Extension filter: *" confirms that the tool is not doing a global extension search (like "find all .jpg files"). Instead, it is relying on the specific filenames listed above. The * means it isn't restricting the search by extension separately; it is matching the full name provided in the Filter line.
 
 ```
