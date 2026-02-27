@@ -3,21 +3,60 @@
 UnDeleteFile Recovery Module
 #>
 
+$ConfigPath = Join-Path $PSScriptRoot "configuration.json"
+
 # Default Configuration
 $script:SourcePath = "G:\Some Folder"
-$script:Destination = "E:\Some Folder"
+$script:Destination = "E:\Undelete"
 $script:FilePatterns = @("SomeFile1.Ext", "SomeFile2.Ext")
+$script:RecoveryMode = "regular"
+
+$ModeDescriptions = @{
+    "regular"   = "Fastest for Recent Deletes"
+    "extensive" = "Scans Entire Drive"
+    "segment"   = "File Segments (NTFS Only)"
+}
+
+function Load-Config {
+    if (Test-Path $ConfigPath) {
+        try {
+            $config = Get-Content $ConfigPath -Raw | ConvertFrom-Json
+            $script:SourcePath = $config.SourcePath
+            $script:Destination = $config.Destination
+            $script:FilePatterns = $config.FilePatterns
+            $script:RecoveryMode = $config.RecoveryMode
+            Write-Host " Configuration loaded from configuration.json" -ForegroundColor Gray
+            Start-Sleep -Seconds 1
+        } catch {
+            Write-Host " Could not load configuration.json, using defaults." -ForegroundColor Yellow
+            Start-Sleep -Seconds 1
+        }
+    }
+}
+
+function Save-Config {
+    try {
+        $config = @{
+            SourcePath = $SourcePath
+            Destination = $Destination
+            FilePatterns = $FilePatterns
+            RecoveryMode = $RecoveryMode
+        }
+        $config | ConvertTo-Json -Depth 10 | Out-File -FilePath $ConfigPath -Encoding UTF8
+        Write-Host " Configuration saved to configuration.json" -ForegroundColor Green
+    } catch {
+        Write-Host " Could not save configuration: $_ " -ForegroundColor Red
+    }
+}
 
 function Show-Header {
     Clear-Host
     Write-Host "===============================================================================" -ForegroundColor Cyan
     Write-Host "    UnDeleteFile" -ForegroundColor Cyan
     Write-Host "===============================================================================" -ForegroundColor Cyan
-    # No trailing newline here, managed in Show-Config for exact spacing
 }
 
 function Show-Config {
-    # 8 Empty Lines after Header
     1..8 | ForEach-Object { Write-Host "" }
     
     Write-Host "    1. Set Full Path: $SourcePath" -ForegroundColor White
@@ -25,11 +64,12 @@ function Show-Config {
     Write-Host "    2. Set File Name(s): $($FilePatterns -join ', ')" -ForegroundColor White
     Write-Host ""
     Write-Host "    3. Set Destination: $Destination" -ForegroundColor White
+    Write-Host ""
+    Write-Host "    4. Set Recovery Mode: $RecoveryMode ($($ModeDescriptions[$RecoveryMode]))" -ForegroundColor White
     
-    # 8 Empty Lines before Footer
     1..8 | ForEach-Object { Write-Host "" }
     
-    Write-Host "----------------------------------------------------------------------------------------------------------------------------------------------------------------" -ForegroundColor Gray
+    Write-Host "-------------------------------------------------------------------------------" -ForegroundColor Gray
 }
 
 function Edit-Source {
@@ -42,7 +82,7 @@ function Edit-Source {
 }
 
 function Edit-Patterns {
-    $newPatterns = Read-Host "Enter file names/extensions (comma separated, e.g., *.jpg, document.docx)"
+    $newPatterns = Read-Host "Enter file names/extensions (comma separated, e.g., *.gguf, document.docx)"
     if ($newPatterns) {
         $script:FilePatterns = $newPatterns.Split(',') | ForEach-Object { $_.Trim() }
         Write-Host "File Patterns updated." -ForegroundColor Green
@@ -60,6 +100,44 @@ function Edit-Destination {
     Start-Sleep -Seconds 1
 }
 
+function Edit-Mode {
+    Clear-Host
+    Write-Host "===============================================================================" -ForegroundColor Cyan
+    Write-Host "    Recovery Mode Selection" -ForegroundColor Cyan
+    Write-Host "===============================================================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "    1. Regular   - $($ModeDescriptions['regular'])" -ForegroundColor White
+    Write-Host ""
+    Write-Host "    2. Extensive - $($ModeDescriptions['extensive'])" -ForegroundColor White
+    Write-Host ""
+    Write-Host "    3. Segment   - $($ModeDescriptions['segment'])" -ForegroundColor White
+    Write-Host ""
+    Write-Host "    Current Mode: $RecoveryMode ($($ModeDescriptions[$RecoveryMode]))" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "-------------------------------------------------------------------------------" -ForegroundColor Gray
+    
+    $modeChoice = Read-Host "Select Mode (1-3)"
+    
+    switch ($modeChoice) {
+        '1' { 
+            $script:RecoveryMode = "regular"
+            Write-Host "Mode set to Regular." -ForegroundColor Green 
+        }
+        '2' { 
+            $script:RecoveryMode = "extensive"
+            Write-Host "Mode set to Extensive." -ForegroundColor Green 
+        }
+        '3' { 
+            $script:RecoveryMode = "segment"
+            Write-Host "Mode set to Segment." -ForegroundColor Green 
+        }
+        default { 
+            Write-Host "Invalid selection." -ForegroundColor Red 
+        }
+    }
+    Start-Sleep -Seconds 1
+}
+
 function Start-Recovery {
     Show-Header
     Write-Host " Checking for Windows File Recovery (winfr)..." -ForegroundColor Yellow
@@ -72,10 +150,8 @@ function Start-Recovery {
         return
     }
 
-    # Extract Drive Letter from Source Path for winfr (winfr requires 'G:' not 'G:\Folder')
     $sourceDriveLetter = $SourcePath.Substring(0,2)
     
-    # Validate Destination != Source
     if ($sourceDriveLetter.Substring(0,1) -eq $Destination.Substring(0,1)) {
         Write-Host " ERROR: Destination cannot be on the same drive as Source. " -ForegroundColor Red
         Read-Host "Press Enter to return "
@@ -85,7 +161,6 @@ function Start-Recovery {
     Write-Host " 'winfr' found. Preparing recovery... " -ForegroundColor Green
     Write-Host " "
 
-    # Ensure destination directory exists
     if (-not (Test-Path $Destination)) {
         try {
             New-Item -Path $Destination -ItemType Directory -Force | Out-Null
@@ -97,21 +172,31 @@ function Start-Recovery {
         }
     }
 
-    # Build arguments
-    $argList = @("$sourceDriveLetter", "$Destination", "/regular")
+    Save-Config
+
+    $argList = @("$sourceDriveLetter", "$Destination", "/$RecoveryMode")
+    
     foreach ($pattern in $FilePatterns) {
         $argList += "/n"
-        if ($pattern -notmatch "^\\") {
-            $argList += "\$pattern"
+        if ($pattern -notmatch "^\*\.") {
+            $argList += "*$pattern"
         } else {
             $argList += "$pattern"
         }
     }
 
-    Write-Host "-----------------------------------------------------------------------------" -ForegroundColor Gray
+    Write-Host "-------------------------------------------------------------------------------" -ForegroundColor Gray
     Write-Host " Starting Recovery Process... " -ForegroundColor Cyan
-    Write-Host "-----------------------------------------------------------------------------" -ForegroundColor Gray
+    Write-Host " Mode : $RecoveryMode ($($ModeDescriptions[$RecoveryMode]))" -ForegroundColor White
+    Write-Host " Source : $sourceDriveLetter " -ForegroundColor White
+    Write-Host " Target : $Destination " -ForegroundColor White
+    Write-Host "-------------------------------------------------------------------------------" -ForegroundColor Gray
     Write-Host " "
+    
+    if ($RecoveryMode -eq "extensive") {
+        Write-Host " NOTE: Extensive mode can take several hours for large drives." -ForegroundColor Yellow
+        Write-Host " "
+    }
 
     try {
          & winfr $argList
@@ -125,15 +210,18 @@ function Start-Recovery {
 }
 
 # Main Loop
+Load-Config
+
 do {
     Show-Header
     Show-Config
-    $choice = Read-Host "Selection; Menu Options = 1-3, Run Recovery = R, Exit Program = X"
+    $choice = Read-Host "Selection; Menu Option 1-4, Run Recovery=R, Exit Program=X:"
     
     switch ($choice.ToUpper()) {
         '1' { Edit-Source }
         '2' { Edit-Patterns }
         '3' { Edit-Destination }
+        '4' { Edit-Mode }
         'R' { Start-Recovery }
         'X' { Write-Host "Exiting..."; Start-Sleep -Seconds 1 }
         default { Write-Host "Invalid selection."; Start-Sleep -Seconds 1 }

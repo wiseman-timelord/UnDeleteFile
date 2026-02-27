@@ -1,6 +1,14 @@
 @echo off
 setlocal EnableDelayedExpansion
 title UnDeleteFile
+mode con cols=85 lines=30
+powershell -noprofile -command "& { $w = $Host.UI.RawUI; $b = $w.BufferSize; $b.Height = 6000; $w.BufferSize = $b; }"
+
+:: DP0 TO SCRIPT BLOCK
+set "ScriptDirectory=%~dp0"
+set "ScriptDirectory=%ScriptDirectory:~0,-1%"
+cd /d "%ScriptDirectory%"
+echo Dp0'd to Script.
 
 :MENU
 cls
@@ -14,12 +22,9 @@ echo.
 echo.
 echo.
 echo.
-echo.
-echo.
 echo     1. Run UnDeleteFile Tool
 echo.
-echo     2. Install Dependencies (Windows File Recovery)
-echo.
+echo     2. Install Dependencies
 echo.
 echo.
 echo.
