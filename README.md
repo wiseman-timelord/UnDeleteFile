@@ -3,7 +3,7 @@ Status: Planning (Pre-Alpha)
 
 ### Description
 This will be a program inspired from the following prompt...
-- This is a basic windows 10 file undelete program with text UI. The user must provide, Source Path and File Names and Output Path, then run the undelete. It will be no-frills, but hopefully functional.
+- This is a basic windows 10 file undelete program with text UI. The user must provide, Source Path and File Names and Output Path, then run the undelete. It will be no-frills, but hopefully functional and working. I made this after I realise most undelete program has pre-set extensions to search for, and this does not cover newer extensions, such as `*.gguf`.
 
 ### Preview
 - The program...
