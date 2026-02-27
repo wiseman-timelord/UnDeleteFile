@@ -23,7 +23,9 @@ This will be a program inspired from the following prompt...
 
     2. Set File Name(s): SomeFile1.Ext, SomeFile2.Ext
 
-    3. Set Destination: E:\Some Folder
+    3. Set Destination: E:\Undelete
+
+    4. Set Recovery Mode: regular (Fastest for Recent Deletes)
 
 
 
@@ -32,8 +34,8 @@ This will be a program inspired from the following prompt...
 
 
 
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
-Selection; Menu Options = 1-3, Run Recovery = R, Exit Program = X:
+-------------------------------------------------------------------------------
+Selection; Menu Option 1-4, Run Recovery=R, Exit Program=X::
 
 ```
 - The installer...
@@ -51,6 +53,10 @@ Selection; Menu Options = 1-3, Run Recovery = R, Exit Program = X:
  -------------------------------------------------------------------------------
   Result: ALREADY INSTALLED
   Windows File Recovery is already up-to-date on this system.
+
+ [3/3] Creating configuration.json...
+  Result: SUCCESS
+  configuration.json created at: C:\Program_Files\UnDeleteFile\configuration.json
 
 Press Enter to return to Menu:
 
