@@ -22,9 +22,14 @@ echo.
 echo.
 echo.
 echo.
+echo.
+echo.
+echo.
 echo     1. Run UnDeleteFile Tool
 echo.
 echo     2. Install Dependencies
+echo.
+echo.
 echo.
 echo.
 echo.
