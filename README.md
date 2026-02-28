@@ -1,5 +1,5 @@
 # UnDeleteFile
-Status: Planning (Pre-Alpha)
+Status: Alpha - Testing.
 
 ### Description
 This will be a program inspired from the following prompt...
@@ -65,4 +65,5 @@ Press Enter to return to Menu:
 ### Notation
 - This "Extension filter: *" confirms that the tool is not doing a global extension search (like "find all .jpg files"). Instead, it is relying on the specific filenames listed above. The * means it isn't restricting the search by extension separately; it is matching the full name provided in the Filter line.
 
-```
+### Development
+-  Supposedly it works, but needs more testing. It did not detect my Qwen3.5 A3B 35B gguf model, when using "Delete File#" in Edge Browser interface.
